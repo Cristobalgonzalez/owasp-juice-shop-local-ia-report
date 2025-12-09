@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Aplicación Vulnerable OWASP</title>
+        <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    header {
+      background: #2c3e50;
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    h1 { font-size: 2.5em; margin-bottom: 10px; }
+    .subtitle { opacity: 0.8; font-size: 1.1em; }
+    main {
+      padding: 30px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+    .section {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+    .section h2 {
+      color: #2c3e50;
+      margin-bottom: 15px;
+      font-size: 1.3em;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.95em;
+    }
+    button {
+      background: #667eea;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: bold;
+      transition: background 0.3s;
+      width: 100%;
+    }
+    button:hover { background: #764ba2; }
+    .result {
+      background: #ecf0f1;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 15px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      border: 1px solid #bdc3c7;
+    }
+    .warning {
+      background: #fff3cd;
+      border-left-color: #ffc107 !important;
+      color: #856404;
+    }
+    .danger {
+      background: #f8d7da;
+      border-left-color: #dc3545 !important;
+      color: #721c24;
+    }
+    .success {
+      background: #d4edda;
+      border-left-color: #28a745 !important;
+      color: #155724;
+    }
+    @media (max-width: 768px) {
+      main { grid-template-columns: 1fr; }
+      h1 { font-size: 1.8em; }
+    }
+  </style>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>🔓 Aplicación Vulnerable OWASP</h1>
+                <p class="subtitle">Análisis de Seguridad - OWASP Top 10</p>
+            </header>
+
+            <main>
+                <!-- Login Section -->
+                <div class="section warning">
+                    <h2>🔑 Login (Vulnerabilidad: Autenticación Débil)</h2>
+                    <p style="margin-bottom: 10px; font-size: 0.9em;">Intenta
+                        con: admin / password123</p>
+                    <input type="text" id="username" placeholder="Username">
+                    <input type="password" id="password" placeholder="Password">
+                    <button onclick="login()">Iniciar Sesión</button>
+                    <div id="loginResult" class="result"
+                        style="display:none;"></div>
+                </div>
+
+                <!-- SQL Injection Section -->
+                <div class="section danger">
+                    <h2>💉 SQL Injection</h2>
+                    <p style="margin-bottom: 10px; font-size: 0.9em;">Prueba:
+                        admin' -- o 'x'='x</p>
+                    <input type="text" id="searchUser"
+                        placeholder="Buscar usuario">
+                    <button onclick="searchUser()">Buscar</button>
+                    <div id="searchResult" class="result"
+                        style="display:none;"></div>
+                </div>
+
+                <!-- XSS Section -->
+                <div class="section danger">
+                    <h2>⚠️ Cross-Site Scripting (XSS)</h2>
+                    <p style="margin-bottom: 10px; font-size: 0.9em;">Prueba:
+                        &lt;img src=x onerror=alert('XSS')&gt;</p>
+                    <button onclick="testXSS()">Ver Perfil (Vulnerable)</button>
+                    <div id="xssResult" class="result"
+                        style="display:none;"></div>
+                </div>
+
+                <!-- Debug Info Section -->
+                <div class="section danger">
+                    <h2>🔧 Información de Debug Expuesta</h2>
+                    <p style="margin-bottom: 10px; font-size: 0.9em;">Se expone
+                        información sensible</p>
+                    <button onclick="getDebugInfo()">Ver Información</button>
+                    <div id="debugResult" class="result"
+                        style="display:none;"></div>
+                </div>
+
+                <!-- User Data Section -->
+                <div class="section danger">
+                    <h2>👤 Datos de Usuario (Acceso Directo)</h2>
+                    <p style="margin-bottom: 10px; font-size: 0.9em;">ID 1 =
+                        admin, ID 2 = user1</p>
+                    <input type="number" id="userId" placeholder="User ID"
+                        value="1" min="1" max="10">
+                    <button onclick="getUserData()">Ver Datos</button>
+                    <div id="userResult" class="result"
+                        style="display:none;"></div>
+                </div>
+
+                <!-- Admin Panel Section -->
+                <div class="section danger">
+                    <h2>🛡️ Panel Admin (Sin Autenticación)</h2>
+                    <p style="margin-bottom: 10px; font-size: 0.9em;">Crear
+                        usuario sin permisos</p>
+                    <input type="text" id="newUsername" placeholder="Username">
+                    <input type="email" id="newEmail" placeholder="Email">
+                    <select id="newRole">
+                        <option value="user">Usuario</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                    <button onclick="createUser()">Crear Usuario</button>
+                    <div id="createResult" class="result"
+                        style="display:none;"></div>
+                </div>
+
+                <!-- IDOR Section -->
+                <div class="section danger">
+                    <h2>🔓 Acceso Directo a Objetos (IDOR)</h2>
+                    <p style="margin-bottom: 10px; font-size: 0.9em;">Ver notas
+                        de cualquier usuario</p>
+                    <input type="number" id="noteId" placeholder="Note ID"
+                        value="1" min="1" max="10">
+                    <button onclick="getNote()">Ver Nota</button>
+                    <div id="noteResult" class="result"
+                        style="display:none;"></div>
+                </div>
+            </main>
+        </div>
+
+        <script>
+    function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      
+      fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      })
+      .then(r => r.json())
+      .then(data => {
+        const result = document.getElementById('loginResult');
+        result.style.display = 'block';
+        result.textContent = JSON.stringify(data, null, 2);
+      });
+    }
+
+    function searchUser() {
+      const username = document.getElementById('searchUser').value;
+      fetch(`/users/search?username=${encodeURIComponent(username)}`)
+        .then(r => r.json())
+        .then(data => {
+          const result = document.getElementById('searchResult');
+          result.style.display = 'block';
+          result.textContent = JSON.stringify(data, null, 2);
+        });
+    }
+
+    function testXSS() {
+      fetch('/profile')
+        .then(r => r.text())
+        .then(html => {
+          const result = document.getElementById('xssResult');
+          result.style.display = 'block';
+          result.textContent = html.substring(0, 500) + '...';
+        });
+    }
+
+    function getDebugInfo() {
+      fetch('/debug')
+        .then(r => r.json())
+        .then(data => {
+          const result = document.getElementById('debugResult');
+          result.style.display = 'block';
+          result.textContent = JSON.stringify(data, null, 2);
+        });
+    }
+
+    function getUserData() {
+      const userId = document.getElementById('userId').value;
+      fetch(`/api/user/${userId}`)
+        .then(r => r.json())
+        .then(data => {
+          const result = document.getElementById('userResult');
+          result.style.display = 'block';
+          result.textContent = JSON.stringify(data, null, 2);
+        });
+    }
+
+    function createUser() {
+      const username = document.getElementById('newUsername').value;
+      const email = document.getElementById('newEmail').value;
+      const role = document.getElementById('newRole').value;
+      
+      fetch('/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, role })
+      })
+      .then(r => r.json())
+      .then(data => {
+        const result = document.getElementById('createResult');
+        result.style.display = 'block';
+        result.textContent = JSON.stringify(data, null, 2);
+      });
+    }
+
+    function getNote() {
+      const noteId = document.getElementById('noteId').value;
+      fetch(`/notes/${noteId}`)
+        .then(r => r.json())
+        .then(data => {
+          const result = document.getElementById('noteResult');
+          result.style.display = 'block';
+          result.textContent = JSON.stringify(data, null, 2);
+        });
+    }
+  </script>
+    </body>
+</html>
